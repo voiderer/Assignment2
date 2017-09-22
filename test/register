@@ -4,7 +4,7 @@ curl -i -X POST -H 'Content-Type: application/json' -d '{
               "lname": "Snow",
               "fname": "Jon",
               "address": "nowhere",
-              "city": "",
+              "city": "winterfell",
               "state":"NR",
               "zip":"12345",
               "email": "JonSnow@aws.com",

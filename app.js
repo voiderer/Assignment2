@@ -1,12 +1,9 @@
-//load  modules
 var express = require('express');
 var mysql = require('mysql');
 var sessions = require('client-sessions');
 var bodyParser = require('body-parser');
 var joi= require("joi");
-var valication=require('./validation');
-/////////////////////////////////
-
+var validation=require('./validation');
 //create and test connection
 var con = mysql.createConnection({
     host: "db2.ccvrssydyenj.us-east-1.rds.amazonaws.com",
@@ -36,25 +33,25 @@ app.use(sessions({
     duration: 24 * 60 * 60 * 1000,
     activeDuration: 15 * 60 * 1000
 }));
-
 app.post('/registerUser',function (req, res) {
-    var result = joi.validate(req.body, valication.register);
-    if (result.error === null) {
+    var re = joi.validate(req.body, validation.register);
+    console.log(re);
+    if (re.error !== null) {
         res.send(invalidity);
         return
     }
     var searcher = "SELECT * FROM customers WHERE username=\'" + req.body.username + "\'";
-    con.query(searcher, function (err, result) {
-        if (err||result.length > 0) {
+/*    con.query(searcher, function (err, result) {
+        if (err || result.length > 0) {
             res.send(invalidity);
-            return;
         }
-        var insert = "INSERT INTO customers values(\'" + req.body.fname + "\',\'" + req.body.lname + "\',\'";
-        insert += req.body.address + "\',\'" + req.body.city + "\',\'" + req.body.state + "\',\'" + req.body.zip + "\',\'";
-        insert += req.body.email + "\',\'" + req.body.username + "\',\'" + req.body.password + "\')";
-        con.query(insert);
-        res.send({message: req.body.fname+" was registered successfully"});
-    });
+    });*/
+    var cres=con.query(searcher);
+    var insert = "INSERT INTO customers values(\'" + req.body.fname + "\',\'" + req.body.lname + "\',\'";
+    insert += req.body.address + "\',\'" + req.body.city + "\',\'" + req.body.state + "\',\'" + req.body.zip + "\',\'";
+    insert += req.body.email + "\',\'" + req.body.username + "\',\'" + req.body.password + "\')";
+    con.query(insert);
+    res.send({message: req.body.fname + " was registered successfully"});
 });
 
 app.post('/login', function (req, res) {
@@ -74,7 +71,6 @@ app.post('/login', function (req, res) {
         res.send({message: "Welcome " + result[0].fname })
     });
 });
-
 app.post('/logout', function (req, res) {
     if (req.cookie_project2.login) {
         req.cookie_project2.login = false;
@@ -83,8 +79,6 @@ app.post('/logout', function (req, res) {
         res.send({"message": "You are not currently logged in"})
     }
 });
-
-
 var server = app.listen(8082, function () {
     var addr = server.address();
     var bind = typeof addr === 'string'
