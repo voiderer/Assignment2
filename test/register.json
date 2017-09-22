@@ -1,0 +1,38 @@
+{
+  "config": {
+    "target": "http://localhost:8082",
+    "phases": [
+      {
+        "duration": 1,
+        "arrivalCount": 1
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "register test",
+      "flow": [
+        {
+          "post":{
+            "url":"/registerUser",
+            "json":{
+              "lname": "Snow",
+              "address": "nowhere",
+              "city": "Winterfell",
+              "state":"NR",
+              "zip":"12345",
+              "email": "JonSnow@aws.com",
+              "username": "JSnow",
+              "password": "fawefhoai"
+            },
+            "match": {
+              "json":"$.result",
+              "value":"John was registered successfully"
+            }
+          }
+
+        }
+      ]
+    }
+  ]
+}

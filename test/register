@@ -1,0 +1,12 @@
+#!/bin/sh
+
+curl -i -X POST -H 'Content-Type: application/json' -d '{
+              "lname": "Snow",
+              "fname": "Jon",
+              "address": "nowhere",
+              "city": "",
+              "state":"NR",
+              "zip":"12345",
+              "email": "JonSnow@aws.com",
+              "username": "JSnow",
+              "password": "fawefhoai"}' http://localhost:8082/registerUser
