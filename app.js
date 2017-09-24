@@ -127,7 +127,7 @@ app.post('/updateInfo',function(req,res){
             update+="email = \'"+req.body.email+"\',";
         if(update.charAt(update.length-1)===',')
             update=update.substring(0,update.length-1);
-        update+= "WHERE \'username\'=\'"+req.cookie_project2.username+"\'";
+        update+= "WHERE username=\'"+req.cookie_project2.username+"\'";
         console.log(update);
         con.query(update);
         res.send({"message": result[0].fname+" your information was successfully updated"})

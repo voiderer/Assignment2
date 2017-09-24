@@ -1,0 +1,103 @@
+{
+  "config": {
+    "target": "http://localhost:8082",
+    "phases": [
+      {
+        "duration": 1,
+        "arrivalCount": 1
+      }
+    ],
+    "payload": [
+      {
+        "path": "UserData.csv",
+        "fields": [
+          "fname",
+          "lname",
+          "address",
+          "city",
+          "state",
+          "zip",
+          "email",
+          "username",
+          "password"
+        ],
+        "order": "sequence"
+      },
+      {
+        "path": "productData.csv",
+        "fields": [
+          "asin",
+          "productName",
+          "productDescription",
+          "group"
+        ],
+        "order": "sequence"
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "login not registered",
+      "flow": [
+        {
+          "post": {
+            "url": "/login",
+            "json": {
+              "username": "{{{ username }}}",
+              "password": "{{ password }}"
+            },
+            "match": {
+              "json": "$.message",
+              "value": "There seems to be an issue with the username/password combination that you entered"
+            }
+          }
+        },
+        {
+          "post": {
+            "url": "/registerUser",
+            "json": {
+              "fname": "{{{fname}}}",
+              "lname": "{{lname}}",
+              "address": "{{{address}}}",
+              "city": "{{{city}}}",
+              "state": "{{{state}}}",
+              "zip": "{{{zip}}}",
+              "email": "{{{email}}}",
+              "username": "{{{ username }}}",
+              "password": "{{ password }}"
+            },
+            "match": {
+              "json": "$.message",
+              "value": "{{{fname}}} was registered successfully"
+            }
+          }
+        },
+        {
+          "post": {
+            "url": "/login",
+            "json": {
+              "username": "{{{username}}}",
+              "password": "{{{password}}}"
+            },
+            "match": {
+              "json": "$.message",
+              "value": "Welcome {{{fname}}}"
+            }
+          }
+        },
+        {
+          "post": {
+            "url": "/updateInfo",
+            "json": {
+              "lname": "random"
+            },
+            "match": {
+              "json": "$.message",
+              "value": "{{{fname}}} your information was successfully updated"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
