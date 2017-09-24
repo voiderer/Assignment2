@@ -4,14 +4,12 @@ var sessions = require('client-sessions');
 var bodyParser = require('body-parser');
 var joi= require("joi");
 var validation=require('./validation');
-//create and test connection
 var con = mysql.createConnection({
     host: "db2.ccvrssydyenj.us-east-1.rds.amazonaws.com",
     user: "autoy",
     password: "dbpasswd",
     database: "project2"
 });
-
 con.connect(function (err) {
     if (err) {
         throw err;
@@ -20,11 +18,10 @@ con.connect(function (err) {
         console.log("Database connection success!");
     }
 });
-//////////////////////////////////////
 var invalidity={message: "The input you provided is not valid"};
 var mess = {message: "There seems to be an issue with the username/password combination that you entered"};
-////
 var app = express();
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(sessions({
@@ -34,30 +31,32 @@ app.use(sessions({
     activeDuration: 15 * 60 * 1000
 }));
 app.post('/registerUser',function (req, res) {
+
     var re = joi.validate(req.body, validation.register);
-    console.log(re);
     if (re.error !== null) {
         res.send(invalidity);
         return
     }
-    var searcher = "SELECT * FROM customers WHERE username=\'" + req.body.username + "\'";
-/*    con.query(searcher, function (err, result) {
+    var admincheck="SELECT * FROM admin WHERE username=\'" + req.body.username + "\'";
+    var searcher ="SELECT * FROM customers WHERE username=\'" + req.body.username + "\'";
+    con.query(searcher, function (err, result) {
         if (err || result.length > 0) {
             res.send(invalidity);
+            return;
         }
-    });*/
-    var cres=con.query(searcher);
-    var insert = "INSERT INTO customers values(\'" + req.body.fname + "\',\'" + req.body.lname + "\',\'";
-    insert += req.body.address + "\',\'" + req.body.city + "\',\'" + req.body.state + "\',\'" + req.body.zip + "\',\'";
-    insert += req.body.email + "\',\'" + req.body.username + "\',\'" + req.body.password + "\')";
-    con.query(insert);
-    res.send({message: req.body.fname + " was registered successfully"});
+        var insert = "INSERT INTO customers values(\'" + req.body.fname + "\',\'" + req.body.lname + "\',\'";
+        insert += req.body.address + "\',\'" + req.body.city + "\',\'" + req.body.state + "\',\'" + req.body.zip + "\',\'";
+        insert += req.body.email + "\',\'" + req.body.username + "\',\'" + req.body.password + "\')";
+        con.query(insert);
+        res.send({message: req.body.fname + " was registered successfully"});
+    });
 });
 
 app.post('/login', function (req, res) {
-    if (!(req.body.hasOwnProperty("username") && req.body.hasOwnProperty("password"))) {
+    var re = joi.validate(req.body, validation.login);
+    if (re.error !== null) {
         res.send(mess);
-        return;
+        return
     }
     var query = "SELECT * FROM customers WHERE username=\'" + req.body.username + "\'";
     con.query(query, function (err, result) {
@@ -79,6 +78,9 @@ app.post('/logout', function (req, res) {
         res.send({"message": "You are not currently logged in"})
     }
 });
+app.post('/updateInfo',function(
+
+));
 var server = app.listen(8082, function () {
     var addr = server.address();
     var bind = typeof addr === 'string'
