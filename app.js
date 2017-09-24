@@ -78,12 +78,14 @@ app.post('/login', function (req, res) {
                 }
                 req.cookie_project2.login = true;
                 req.cookie_project2.admin = true;
+                req.cookie_project2.username=req.body.username;
                 res.send({message: "Welcome " + result[0].fname})
             });
         } else {
 
             req.cookie_project2.login = true;
             req.cookie_project2.admin = false;
+            req.cookie_project2.username=req.body.username;
             res.send({message: "Welcome " + result[0].fname})
         }
     });
@@ -101,11 +103,7 @@ app.post('/updateInfo',function(req,res){
         res.send({"message":"You are not currently logged in"});
         return
     }
-    if(req.body.username===undefined){
-        res.send({"message":"The input you provided is not valid"});
-        return
-    }
-    var query = "SELECT * FROM customers WHERE username=\'" + req.body.username + "\'";
+    var query = "SELECT * FROM customers WHERE username=\'" + req.cookie_project2.username + "\'";
     con.query(query, function (err, result) {
         if(result.length===0 ){
             res.send({"message":"The input you provided is not valid"});
@@ -116,20 +114,21 @@ app.post('/updateInfo',function(req,res){
         if(req.body.hasOwnProperty('fname'))
             update+="fname = \'"+req.body.fname+"\',";
         if(req.body.hasOwnProperty('lname'))
-            update+="lname = \'"+req.body.fname+"\',";
+            update+="lname = \'"+req.body.lname+"\',";
         if(req.body.hasOwnProperty('address'))
-            update+="address = \'"+req.body.fname+"\',";
+            update+="address = \'"+req.body.address+"\',";
         if(req.body.hasOwnProperty('city'))
-            update+="city = \'"+req.body.fname+"\',";
+            update+="city = \'"+req.body.city+"\',";
         if(req.body.hasOwnProperty('state'))
-            update+="state = \'"+req.body.fname+"\',";
+            update+="state = \'"+req.body.state+"\',";
         if(req.body.hasOwnProperty('zip'))
-            update+="zip = \'"+req.body.fname+"\',";
+            update+="zip = \'"+req.body.zip+"\',";
         if(req.body.hasOwnProperty('email'))
-            update+="email = \'"+req.body.fname+"\',";
+            update+="email = \'"+req.body.email+"\',";
         if(update.charAt(update.length-1)===',')
-            update.substring(0,update.length-2);
-        update+= "WHERE username=\'"+req.body.username+"\'";
+            update=update.substring(0,update.length-1);
+        update+= "WHERE \'username\'=\'"+req.cookie_project2.username+"\'";
+        console.log(update);
         con.query(update);
         res.send({"message": result[0].fname+" your information was successfully updated"})
     });
