@@ -37,19 +37,26 @@ app.post('/registerUser',function (req, res) {
         res.send(invalidity);
         return
     }
-    var admincheck="SELECT * FROM admin WHERE username=\'" + req.body.username + "\'";
-    var searcher ="SELECT * FROM customers WHERE username=\'" + req.body.username + "\'";
-    con.query(searcher, function (err, result) {
-        if (err || result.length > 0) {
-            res.send(invalidity);
+    var admincheck = "SELECT * FROM admin WHERE username=\'" + req.body.username + "\'";
+    con.query(admincheck, function (err, result) {
+        if (result.length > 0) {
+            res.send((invalidity));
             return;
         }
-        var insert = "INSERT INTO customers values(\'" + req.body.fname + "\',\'" + req.body.lname + "\',\'";
-        insert += req.body.address + "\',\'" + req.body.city + "\',\'" + req.body.state + "\',\'" + req.body.zip + "\',\'";
-        insert += req.body.email + "\',\'" + req.body.username + "\',\'" + req.body.password + "\')";
-        con.query(insert);
-        res.send({message: req.body.fname + " was registered successfully"});
+        var searcher = "SELECT * FROM customers WHERE username=\'" + req.body.username + "\'";
+        con.query(searcher, function (err, result) {
+            if (err || result.length > 0) {
+                res.send(invalidity);
+                return;
+            }
+            var insert = "INSERT INTO customers values(\'" + req.body.fname + "\',\'" + req.body.lname + "\',\'";
+            insert += req.body.address + "\',\'" + req.body.city + "\',\'" + req.body.state + "\',\'" + req.body.zip + "\',\'";
+            insert += req.body.email + "\',\'" + req.body.username + "\',\'" + req.body.password + "\')";
+            con.query(insert);
+            res.send({message: req.body.fname + " was registered successfully"});
+        });
     });
+
 });
 
 app.post('/login', function (req, res) {
@@ -60,14 +67,25 @@ app.post('/login', function (req, res) {
     }
     var query = "SELECT * FROM customers WHERE username=\'" + req.body.username + "\'";
     con.query(query, function (err, result) {
-        if (err||result.length !== 1||result[0].password !== req.body.password){
+        if (err || result.length > 0 && result[0].password !== req.body.password) {
             res.send(mess);
-            return;
-        }
-        if (!req.cookie_project2.login) {
+        } else if (result.length === 0) {
+            var searcher = "SELECT * FROM admin WHERE username=\'" + req.body.username + "\'";
+            con.query(searcher, function (err, result) {
+                if (err || result.length === 0 || result[0].password !== req.body.password) {
+                    res.send(mess);
+                    return;
+                }
+                req.cookie_project2.login = true;
+                req.cookie_project2.admin = true;
+                res.send({message: "Welcome " + result[0].fname})
+            });
+        } else {
+
             req.cookie_project2.login = true;
+            req.cookie_project2.admin = false;
+            res.send({message: "Welcome " + result[0].fname})
         }
-        res.send({message: "Welcome " + result[0].fname })
     });
 });
 app.post('/logout', function (req, res) {
@@ -78,9 +96,164 @@ app.post('/logout', function (req, res) {
         res.send({"message": "You are not currently logged in"})
     }
 });
-app.post('/updateInfo',function(
+app.post('/updateInfo',function(req,res){
+    if(!req.cookie_project2.login){
+        res.send({"message":"You are not currently logged in"});
+        return
+    }
+    if(req.body.username===undefined){
+        res.send({"message":"The input you provided is not valid"});
+        return
+    }
+    var query = "SELECT * FROM customers WHERE username=\'" + req.body.username + "\'";
+    con.query(query, function (err, result) {
+        if(result.length===0 ){
+            res.send({"message":"The input you provided is not valid"});
+            return
+        }
+        var update="UPDATE customers SET ";
 
-));
+        if(req.body.hasOwnProperty('fname'))
+            update+="fname = \'"+req.body.fname+"\',";
+        if(req.body.hasOwnProperty('lname'))
+            update+="lname = \'"+req.body.fname+"\',";
+        if(req.body.hasOwnProperty('address'))
+            update+="address = \'"+req.body.fname+"\',";
+        if(req.body.hasOwnProperty('city'))
+            update+="city = \'"+req.body.fname+"\',";
+        if(req.body.hasOwnProperty('state'))
+            update+="state = \'"+req.body.fname+"\',";
+        if(req.body.hasOwnProperty('zip'))
+            update+="zip = \'"+req.body.fname+"\',";
+        if(req.body.hasOwnProperty('email'))
+            update+="email = \'"+req.body.fname+"\',";
+        if(update.charAt(update.length-1)===',')
+            update.substring(0,update.length-2);
+        update+= "WHERE username=\'"+req.body.username+"\'";
+        con.query(update);
+        res.send({"message": result[0].fname+" your information was successfully updated"})
+    });
+});
+app.post('/addProducts',function (req, res) {
+    if (!req.cookie_project2.login){
+        res.send({"message":"You are not currently logged in"});
+        return
+    }
+    if(!req.cookie_project2.admin){
+        res.send({message:"You must be an admin to perform this action"});
+        return
+    }
+    var re = joi.validate(req.body, validation.product);
+    if (re.error !== null) {
+        res.send(mess);
+        return
+    }
+    var query = "SELECT * FROM products WHERE asin=\'" + req.body.username + "\'";
+    con.query(query,function (err, result) {
+        if(err||result.length!==1){
+            res.send(mess);
+            return;
+        }
+        var insert="INSERT INTO products VALUES (\'"+req.body.asin+"\',\'"+req.body.productName;
+        insert+="\',\'"+req.body.productDescription+"\',\'"+req.body.group+'\')';
+        con.query(insert);
+        res.send({message:req.body.propertyName+" was successfully added to the system"})
+    })
+
+});
+app.post('/modifyProducts',function (req, res) {
+    if (!req.cookie_project2.login){
+        res.send({"message":"You are not currently logged in"});
+        return
+    }
+    if(!req.cookie_project2.admin){
+        res.send({message:"You must be an admin to perform this action"});
+        return
+    }
+    var re = joi.validate(req.body, validation.product);
+    if (re.error !== null) {
+        res.send(mess);
+        return
+    }
+    var query = "SELECT * FROM products WHERE asin=\'" + req.body.username + "\'";
+    con.query(query,function (err, result) {
+        if(err||result.length!==1){
+            res.send(mess);
+            return;
+        }
+        var update="UPDATE products set asin=\'"+req.body.asin+"\',name=\'"+req.body.productName;
+        update+="\',description=\'"+req.body.productDescription+"\',group=\'"+req.body.group+'\' WHERE asin=\''+req.body.asin+"\'";
+        con.query(update);
+        res.send({message:req.body.propertyName+" was successfully updated"});
+    })
+
+});
+app.post('/viewUsers',function (req, res) {
+    if (!req.cookie_project2.login){
+        res.send({"message":"You are not currently logged in"});
+        return
+    }
+    if(!req.cookie_project2.admin){
+        res.send({message:"You must be an admin to perform this action"});
+        return
+    }
+    var query= "SELECT fname,lname,username FROM customers ";
+    if(req.body.hasOwnProperty("fname")&&req.body.hasOwnProperty("lname")){
+        query+="WHERE fname LIKE \'%"+req.body.fname+"%\' AND lname LIKE \'%" +req.body.lname+"%\'";
+    }else if(req.body.hasOwnProperty("fname")){
+        query+="WHERE fname LIKE \'%"+req.body.fname+"%\'";
+    }else if(req.body.hasOwnProperty("lname")){
+        query+="WHERE lname LIKE \'%"+req.body.lname+"%\'";
+    }
+
+    con.query(query,function(err,result){
+        if(err||result.length===0){
+            res.send(mess);
+            return;
+        }
+        var list={message:"The action was successful",user:[]};
+        result.forEach(function (t) {
+            list.user+={fname:t.fname,lname:t.lname,userId:t.username}
+        });
+        res.send(list);
+    });
+
+});
+app.post('/viewProducts',function (req, res) {
+    var query= "SELECT asin,productName FROM customers ";
+    var condition="";
+    if(req.body.hasOwnProperty("asin")){
+        condition+= "asin =\'"+req.body.asin+"\'";
+    }
+    if(req.body.hasOwnProperty("group")){
+        if(condition!==""){
+            condition+="AND ";
+        }
+        condition+="group =\'"+req.body.group+"\'";
+    }
+    if(req.body.hasOwnProperty("keyword")){
+        if(condition!==""){
+            condition+="AND ";
+        }
+        condition+="productName like \'%"+req.body.keyword+"\' AND productDescription like\'"+req.body.keyword+"\'"
+    }
+
+    if(condition!==""){
+        query+="WHERE "+condition;
+    }
+
+    con.query(query,function(err,result){
+        if(err||result.length===0){
+            res.send({message:"There are no products that match that criteria"});
+            return;
+        }
+        var list={product:[]};
+        result.forEach(function (t) {
+            list.product+={asin:t.asin,productName:t.productName}
+        });
+        res.send(list);
+    });
+});
 var server = app.listen(8082, function () {
     var addr = server.address();
     var bind = typeof addr === 'string'
