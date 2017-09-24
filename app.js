@@ -148,20 +148,20 @@ app.post('/addProducts',function (req, res) {
         res.send(mess);
         return
     }
-    var query = "SELECT * FROM products WHERE asin=\'" + req.body.username + "\'";
+    var query = "SELECT * FROM products WHERE asin=\'" + req.body.asin + "\'";
     con.query(query,function (err, result) {
-        if(err||result.length!==1){
+        if(err||result.length!==0){
             res.send(mess);
             return;
         }
         var insert="INSERT INTO products VALUES (\'"+req.body.asin+"\',\'"+req.body.productName;
-        insert+="\',\'"+req.body.productDescription+"\',\'"+req.body.group+'\')';
+        insert+="\',\'"+req.body.productDescription+"\',\'"+req.body.grup+'\')';
         con.query(insert);
-        res.send({message:req.body.propertyName+" was successfully added to the system"})
+        res.send({message:req.body.productName+" was successfully added to the system"})
     })
 
 });
-app.post('/modifyProducts',function (req, res) {
+app.post('/modifyProduct',function (req, res) {
     if (!req.cookie_project2.login){
         res.send({"message":"You are not currently logged in"});
         return
@@ -175,16 +175,16 @@ app.post('/modifyProducts',function (req, res) {
         res.send(mess);
         return
     }
-    var query = "SELECT * FROM products WHERE asin=\'" + req.body.username + "\'";
+    var query = "SELECT * FROM products WHERE asin=\'" + req.body.asin+ "\'";
     con.query(query,function (err, result) {
         if(err||result.length!==1){
             res.send(mess);
             return;
         }
-        var update="UPDATE products set asin=\'"+req.body.asin+"\',name=\'"+req.body.productName;
-        update+="\',description=\'"+req.body.productDescription+"\',group=\'"+req.body.group+'\' WHERE asin=\''+req.body.asin+"\'";
+        var update="UPDATE products set name=\'"+req.body.productName;
+        update+="\',description=\'"+req.body.productDescription+"\',grup=\'"+req.body.group+'\' WHERE asin=\''+req.body.asin+"\'";
         con.query(update);
-        res.send({message:req.body.propertyName+" was successfully updated"});
+        res.send({message:req.body.productName+" was successfully updated"});
     })
 
 });
@@ -229,7 +229,7 @@ app.post('/viewProducts',function (req, res) {
         if(condition!==""){
             condition+="AND ";
         }
-        condition+="group =\'"+req.body.group+"\'";
+        condition+="grup =\'"+req.body.group+"\'";
     }
     if(req.body.hasOwnProperty("keyword")){
         if(condition!==""){
