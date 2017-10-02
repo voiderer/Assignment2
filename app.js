@@ -82,7 +82,6 @@ app.post('/login', function (req, res) {
                 res.send({message: "Welcome " + result[0].fname})
             });
         } else {
-
             req.cookie_project2.login = true;
             req.cookie_project2.admin = false;
             req.cookie_project2.username=req.body.username;
@@ -133,7 +132,7 @@ app.post('/updateInfo',function(req,res){
         res.send({"message": result[0].fname+" your information was successfully updated"})
     });
 });
-app.post('/addProducts',function (req, res) {
+app.post('/addProduct',function (req, res) {
     if (!req.cookie_project2.login){
         res.send({"message":"You are not currently logged in"});
         return
@@ -212,14 +211,14 @@ app.post('/viewUsers',function (req, res) {
         }
         var list={message:"The action was successful",user:[]};
         result.forEach(function (t) {
-            list.user+={fname:t.fname,lname:t.lname,userId:t.username}
+            list.user.push({fname:t.fname,lname:t.lname,userId:t.username})
         });
         res.send(list);
     });
 
 });
 app.post('/viewProducts',function (req, res) {
-    var query= "SELECT asin,productName FROM customers ";
+    var query= "SELECT asin,name FROM products ";
     var condition="";
     if(req.body.hasOwnProperty("asin")){
         condition+= "asin =\'"+req.body.asin+"\'";
@@ -234,13 +233,13 @@ app.post('/viewProducts',function (req, res) {
         if(condition!==""){
             condition+="AND ";
         }
-        condition+="productName like \'%"+req.body.keyword+"\' AND productDescription like\'"+req.body.keyword+"\'"
+        condition+="(name like \'%"+req.body.keyword+"%\' OR description like\'%"+req.body.keyword+"%\')"
     }
 
     if(condition!==""){
         query+="WHERE "+condition;
     }
-
+    console.log(query);
     con.query(query,function(err,result){
         if(err||result.length===0){
             res.send({message:"There are no products that match that criteria"});
@@ -248,7 +247,7 @@ app.post('/viewProducts',function (req, res) {
         }
         var list={product:[]};
         result.forEach(function (t) {
-            list.product+={asin:t.asin,productName:t.productName}
+            list.product.push({asin:t.asin,productName:t.name})
         });
         res.send(list);
     });
