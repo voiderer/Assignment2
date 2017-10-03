@@ -130,7 +130,7 @@
         },
         {
           "post": {
-            "url": "/addProducts",
+            "url": "/addProduct",
             "json": {
               "asin": "{{{asin}}}",
               "productName": "{{productName}}",

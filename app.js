@@ -132,7 +132,7 @@ app.post('/updateInfo',function(req,res){
         res.send({"message": result[0].fname+" your information was successfully updated"})
     });
 });
-app.post('/addProduct',function (req, res) {
+app.post('/addProducts',function (req, res) {
     if (!req.cookie_project2.login){
         res.send({"message":"You are not currently logged in"});
         return
