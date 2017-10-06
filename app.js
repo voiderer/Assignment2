@@ -252,6 +252,10 @@ app.post('/viewProducts',function (req, res) {
         res.send(list);
     });
 });
+app.get("/",function(req,res){
+    res.send("OK");
+});
+
 var server = app.listen(8082, function () {
     var addr = server.address();
     var bind = typeof addr === 'string'
