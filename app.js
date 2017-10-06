@@ -252,7 +252,7 @@ app.post('/viewProducts',function (req, res) {
         res.send(list);
     });
 });
-app.get("/",function(req,res){
+app.get("/check",function(req,res){
     res.send("OK");
 });
 
