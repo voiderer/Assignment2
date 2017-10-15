@@ -143,13 +143,13 @@ app.post('/addProducts',function (req, res) {
     }
     var re = joi.validate(req.body, validation.product);
     if (re.error !== null) {
-        res.send(mess);
+        res.send(invalidity);
         return
     }
     var query = "SELECT * FROM products WHERE asin=\'" + req.body.asin + "\'";
     con.query(query,function (err, result) {
         if(err||result.length!==0){
-            res.send(mess);
+            res.send(invalidity);
             return;
         }
         var insert="INSERT INTO products VALUES (\'"+req.body.asin+"\',\'"+req.body.productName;
@@ -170,13 +170,13 @@ app.post('/modifyProduct',function (req, res) {
     }
     var re = joi.validate(req.body, validation.product);
     if (re.error !== null) {
-        res.send(mess);
+        res.send(invalidity);
         return
     }
     var query = "SELECT * FROM products WHERE asin=\'" + req.body.asin+ "\'";
     con.query(query,function (err, result) {
         if(err||result.length!==1){
-            res.send(mess);
+            res.send(invalidity);
             return;
         }
         var update="UPDATE products set name=\'"+req.body.productName;
@@ -206,7 +206,7 @@ app.post('/viewUsers',function (req, res) {
 
     con.query(query,function(err,result){
         if(err||result.length===0){
-            res.send(mess);
+            res.send(invalidity);
             return;
         }
         var list={message:"The action was successful",user:[]};
